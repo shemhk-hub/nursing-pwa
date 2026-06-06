@@ -112,12 +112,12 @@ export default function AdminLayout({
   }
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex min-h-screen bg-gray-100">
       {/* Sidebar */}
       <div
         className={`${
           sidebarOpen ? 'w-64' : 'w-20'
-        } bg-teal-900 text-white transition-all duration-300 flex flex-col`}
+        } bg-teal-900 text-white transition-all duration-300 flex flex-col sticky top-0 h-screen`}
       >
         {/* Header */}
         <div className="p-4 border-b border-teal-800 flex items-center justify-between">
@@ -157,14 +157,14 @@ export default function AdminLayout({
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col min-h-0 overflow-y-auto">
         {/* Top Bar */}
         <div className="bg-white border-b border-gray-200 px-6 py-4">
           <h2 className="text-2xl font-bold text-gray-900">Nursing PWA - Admin Panel</h2>
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-auto p-6">
+        <div className="flex-1 p-6">
           {children}
         </div>
       </div>
