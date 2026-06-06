@@ -87,7 +87,7 @@ export default function OTPSignupPage() {
         setStep('success');
         // Redirect after 2 seconds
         setTimeout(() => {
-          router.push('/app/home');
+          router.push('/dashboard');
         }, 2000);
       } else {
         setError(signupResult.error || 'Signup failed');

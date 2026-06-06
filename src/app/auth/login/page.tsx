@@ -29,14 +29,8 @@ export default function LoginPage() {
       }
 
       if (data.user) {
-        // Check user role and redirect accordingly
-        const { data: profile } = await supabase
-          .from('users')
-          .select('role')
-          .eq('id', data.user.id)
-          .single()
-
-        if (profile?.role === 'admin') {
+        // Redirect admin email to admin dashboard, others to student dashboard
+        if (data.user.email === 'shemhk@gmail.com') {
           router.push('/admin')
         } else {
           router.push('/dashboard')

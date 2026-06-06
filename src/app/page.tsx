@@ -58,7 +58,7 @@ export default function Home() {
         }}>
           {user ? (
             <>
-              <Link href="/app/home" style={{
+              <Link href="/dashboard" style={{
                 backgroundColor: '#00897B',
                 color: 'white',
                 padding: '12px 24px',

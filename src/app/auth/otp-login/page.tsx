@@ -59,7 +59,7 @@ export default function OTPLoginPage() {
         setStep('success');
         // Redirect based on user role
         setTimeout(() => {
-          const redirectPath = result.user.role === 'admin' ? '/admin' : '/app/home';
+          const redirectPath = result.user.role === 'admin' ? '/admin' : '/dashboard';
           router.push(redirectPath);
         }, 2000);
       } else {

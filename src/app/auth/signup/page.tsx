@@ -62,7 +62,7 @@ export default function SignupPage() {
 
         if (!loginError) {
           setTimeout(() => {
-            router.push('/app/home')
+            router.push('/dashboard')
           }, 1000)
         } else {
           // If auto-login fails, redirect to login page
