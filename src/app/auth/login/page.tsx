@@ -29,7 +29,18 @@ export default function LoginPage() {
       }
 
       if (data.user) {
-        router.push('/app/home')
+        // Check user role and redirect accordingly
+        const { data: profile } = await supabase
+          .from('users')
+          .select('role')
+          .eq('id', data.user.id)
+          .single()
+
+        if (profile?.role === 'admin') {
+          router.push('/admin')
+        } else {
+          router.push('/dashboard')
+        }
       }
     } catch (err: any) {
       setError(err.message || 'An error occurred')

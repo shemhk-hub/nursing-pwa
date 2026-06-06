@@ -11,9 +11,15 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL('/auth/otp-login', request.url));
     }
 
-    // For admin check, we would need to verify the token
-    // This would typically be done with a server-side check
-    // For now, we'll let the client-side check handle it
+    // Admin role validation happens client-side in admin layout
+    // since we need database access to verify the role
+  }
+
+  // Protect app routes
+  if (request.nextUrl.pathname.startsWith('/app')) {
+    if (!authToken) {
+      return NextResponse.redirect(new URL('/auth/otp-login', request.url));
+    }
   }
 
   // Protect dashboard routes

@@ -16,7 +16,7 @@ export default function OTPLoginPage() {
   const [sessionId, setSessionId] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [userRole] = useState<'student' | 'admin'>('student');
+  const [userRole, setUserRole] = useState<'student' | 'admin'>('student');
 
   const handleRequestOTP = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,13 +52,15 @@ export default function OTPLoginPage() {
         [contactMethod]: contact,
         otp,
         sessionId,
+        userRole,
       });
 
       if (result.success && result.user) {
         setStep('success');
-        // Redirect to app after 2 seconds
+        // Redirect based on user role
         setTimeout(() => {
-          router.push('/app/home');
+          const redirectPath = result.user.role === 'admin' ? '/admin' : '/app/home';
+          router.push(redirectPath);
         }, 2000);
       } else {
         setError(result.error || 'Invalid OTP');
@@ -78,6 +80,34 @@ export default function OTPLoginPage() {
 
         {step === 'contact' && (
           <form onSubmit={handleRequestOTP}>
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Login As
+              </label>
+              <div className="flex gap-4">
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    value="student"
+                    checked={userRole === 'student'}
+                    onChange={(e) => setUserRole(e.target.value as 'student' | 'admin')}
+                    className="mr-2"
+                  />
+                  <span className="text-gray-700">Student</span>
+                </label>
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    value="admin"
+                    checked={userRole === 'admin'}
+                    onChange={(e) => setUserRole(e.target.value as 'student' | 'admin')}
+                    className="mr-2"
+                  />
+                  <span className="text-gray-700">Admin</span>
+                </label>
+              </div>
+            </div>
+
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Contact Method

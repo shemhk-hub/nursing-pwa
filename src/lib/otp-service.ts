@@ -109,6 +109,7 @@ interface VerifyOTPRequest {
   phone?: string;
   otp: string;
   sessionId: string;
+  userRole?: 'student' | 'admin';
 }
 
 export async function verifyOTP(
@@ -144,6 +145,14 @@ export async function verifyOTP(
 
     const user = users[0];
 
+    // Verify role if requested
+    if (request.userRole && user.role !== request.userRole) {
+      return {
+        success: false,
+        error: `User is registered as ${user.role}, not ${request.userRole}`
+      };
+    }
+
     // Mark OTP as verified for this user
     // In production: update verified status in secure storage
 
@@ -154,6 +163,7 @@ export async function verifyOTP(
       entity_type: 'auth',
       details: {
         contact_method: request.email ? 'email' : 'phone',
+        role: user.role,
       },
     });
 
