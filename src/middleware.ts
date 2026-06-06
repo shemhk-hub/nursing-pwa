@@ -2,31 +2,21 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export async function middleware(request: NextRequest) {
-  // Get auth token from cookies
-  const authToken = request.cookies.get('sb-auth-token')?.value;
+  const { pathname } = request.nextUrl;
 
-  // Protect admin routes
-  if (request.nextUrl.pathname.startsWith('/admin')) {
-    if (!authToken) {
-      return NextResponse.redirect(new URL('/auth/otp-login', request.url));
-    }
+  // Check for Supabase session cookie (can be named differently)
+  const cookies = request.cookies.getAll();
+  const hasSession = cookies.some(
+    (c) =>
+      c.name.startsWith('sb-') &&
+      (c.name.includes('auth-token') || c.name.includes('access-token'))
+  );
 
-    // Admin role validation happens client-side in admin layout
-    // since we need database access to verify the role
-  }
+  const isProtected =
+    pathname.startsWith('/admin') || pathname.startsWith('/dashboard');
 
-  // Protect app routes
-  if (request.nextUrl.pathname.startsWith('/app')) {
-    if (!authToken) {
-      return NextResponse.redirect(new URL('/auth/otp-login', request.url));
-    }
-  }
-
-  // Protect dashboard routes
-  if (request.nextUrl.pathname.startsWith('/dashboard')) {
-    if (!authToken) {
-      return NextResponse.redirect(new URL('/auth/otp-login', request.url));
-    }
+  if (isProtected && !hasSession) {
+    return NextResponse.redirect(new URL('/auth/login', request.url));
   }
 
   return NextResponse.next();
