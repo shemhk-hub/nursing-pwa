@@ -83,7 +83,7 @@ export default function Home() {
             </>
           ) : (
             <>
-              <Link href="/auth/login" style={{
+              <Link href="/auth/otp-login" style={{
                 backgroundColor: '#00897B',
                 color: 'white',
                 padding: '12px 24px',
@@ -92,9 +92,9 @@ export default function Home() {
                 fontWeight: '500',
                 display: 'inline-block'
               }}>
-                Login
+                Login with OTP
               </Link>
-              <Link href="/auth/signup" style={{
+              <Link href="/auth/otp-signup" style={{
                 backgroundColor: '#666',
                 color: 'white',
                 padding: '12px 24px',
