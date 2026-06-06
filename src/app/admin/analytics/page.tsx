@@ -27,8 +27,8 @@ export default function Analytics() {
           supabase.from('user_progress').select('progress_percentage'),
         ]);
 
-        const avgProg = progress.data
-          ? Math.round(progress.data.reduce((a: number, b: any) => a + b.progress_percentage, 0) / progress.data.length)
+        const avgProg = progress.data && progress.data.length > 0
+          ? Math.round(progress.data.reduce((a: number, b: any) => a + (b.progress_percentage || 0), 0) / progress.data.length)
           : 0;
 
         setStats({

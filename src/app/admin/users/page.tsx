@@ -6,9 +6,9 @@ import { createClient } from '@supabase/supabase-js';
 interface User {
   id: string;
   email: string;
-  full_name: string;
-  role: string;
-  subscription_status: string;
+  full_name?: string;
+  role?: string;
+  subscription_status?: string;
   created_at: string;
 }
 
@@ -42,8 +42,8 @@ export default function UsersManagement() {
 
   const handleEditStart = (user: User) => {
     setEditingId(user.id);
-    setEditRole(user.role);
-    setEditSubscription(user.subscription_status);
+    setEditRole(user.role ?? 'student');
+    setEditSubscription(user.subscription_status ?? 'free');
   };
 
   const handleEditSave = async (userId: string) => {
@@ -139,7 +139,7 @@ export default function UsersManagement() {
                     <span className={`px-3 py-1 rounded text-white text-xs font-semibold ${
                       user.role === 'admin' ? 'bg-red-500' : 'bg-blue-500'
                     }`}>
-                      {user.role.toUpperCase()}
+                      {(user.role ?? 'student').toUpperCase()}
                     </span>
                   )}
                 </td>
