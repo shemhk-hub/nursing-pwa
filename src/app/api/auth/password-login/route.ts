@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
       // Continue anyway - auth succeeded, profile might not exist yet
     }
 
-    return NextResponse.json(
+    const response = NextResponse.json(
       {
         success: true,
         user: {
@@ -73,6 +73,23 @@ export async function POST(request: NextRequest) {
       },
       { status: 200 }
     );
+
+    // Set Supabase auth cookie so middleware can detect the session
+    const projectRef = supabaseUrl.match(/https:\/\/([^.]+)/)?.[1] || 'local';
+    const cookieName = `sb-${projectRef}-auth-token`;
+    const cookieValue = JSON.stringify([
+      authData.session?.access_token,
+      authData.session?.refresh_token,
+    ]);
+    response.cookies.set(cookieName, cookieValue, {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+    });
+
+    return response;
   } catch (error) {
     console.error('Password login error:', error);
     return NextResponse.json(

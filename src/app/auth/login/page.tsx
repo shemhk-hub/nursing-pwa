@@ -1,43 +1,42 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import Link from 'next/link'
-import { supabase } from '@/lib/supabase'
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('')
+  const [email, setEmail] = useState('shemhk@gmail.com')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const router = useRouter()
+  const [status, setStatus] = useState('')
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+    setStatus('')
     setLoading(true)
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+      setStatus('Signing in...')
+      const res = await fetch('/api/auth/password-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
       })
 
-      if (error) {
-        setError(error.message)
+      const data = await res.json()
+
+      if (!res.ok) {
+        setError(data.error || 'Login failed')
         return
       }
 
-      if (data.user) {
-        // Redirect admin email to admin dashboard, others to student dashboard
-        if (data.user.email === 'shemhk@gmail.com') {
-          router.push('/admin')
-        } else {
-          router.push('/dashboard')
-        }
-      }
+      setStatus('Login successful! Redirecting...')
+
+      // Use window.location for hard redirect to bypass any middleware issues
+      window.location.href = '/admin'
+
     } catch (err: any) {
-      setError(err.message || 'An error occurred')
+      setError('Network error: ' + err.message)
     } finally {
       setLoading(false)
     }
@@ -49,7 +48,7 @@ export default function LoginPage() {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: '#f5f5f5',
+      backgroundColor: '#f0fdf4',
       fontFamily: 'system-ui, sans-serif',
       padding: '20px'
     }}>
@@ -57,49 +56,67 @@ export default function LoginPage() {
         backgroundColor: 'white',
         borderRadius: '12px',
         padding: '40px',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-        maxWidth: '400px',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+        maxWidth: '420px',
         width: '100%'
       }}>
-        <h1 style={{
-          color: '#00897B',
-          fontSize: '28px',
-          marginBottom: '10px',
-          textAlign: 'center'
-        }}>
-          Login
-        </h1>
+        {/* Logo */}
+        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+          <div style={{
+            width: '56px', height: '56px',
+            backgroundColor: '#00897B',
+            borderRadius: '12px',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '28px',
+            marginBottom: '12px'
+          }}>🎓</div>
+          <h1 style={{ color: '#00897B', fontSize: '26px', margin: '0 0 4px', fontWeight: '700' }}>
+            Nursing PWA
+          </h1>
+          <p style={{ color: '#666', fontSize: '14px', margin: 0 }}>
+            Admin Login
+          </p>
+        </div>
 
-        <p style={{
-          color: '#666',
-          fontSize: '14px',
-          textAlign: 'center',
-          marginBottom: '30px'
-        }}>
-          Sign in to your account
-        </p>
-
+        {/* Error */}
         {error && (
           <div style={{
-            backgroundColor: '#ffebee',
-            color: '#c62828',
-            padding: '12px',
-            borderRadius: '6px',
+            backgroundColor: '#fef2f2',
+            border: '1px solid #fca5a5',
+            color: '#dc2626',
+            padding: '12px 16px',
+            borderRadius: '8px',
             marginBottom: '20px',
-            fontSize: '14px'
+            fontSize: '14px',
+            fontWeight: '500'
           }}>
-            {error}
+            ❌ {error}
+          </div>
+        )}
+
+        {/* Status */}
+        {status && !error && (
+          <div style={{
+            backgroundColor: '#f0fdf4',
+            border: '1px solid #86efac',
+            color: '#16a34a',
+            padding: '12px 16px',
+            borderRadius: '8px',
+            marginBottom: '20px',
+            fontSize: '14px',
+            fontWeight: '500'
+          }}>
+            ✅ {status}
           </div>
         )}
 
         <form onSubmit={handleLogin}>
           <div style={{ marginBottom: '20px' }}>
             <label style={{
-              display: 'block',
-              marginBottom: '8px',
-              color: '#333',
-              fontWeight: '500',
-              fontSize: '14px'
+              display: 'block', marginBottom: '6px',
+              color: '#374151', fontWeight: '600', fontSize: '14px'
             }}>
               Email
             </label>
@@ -109,24 +126,22 @@ export default function LoginPage() {
               onChange={(e) => setEmail(e.target.value)}
               required
               style={{
-                width: '100%',
-                padding: '10px',
-                border: '1px solid #ddd',
-                borderRadius: '6px',
-                fontSize: '14px',
-                boxSizing: 'border-box'
+                width: '100%', padding: '11px 14px',
+                border: '1.5px solid #d1d5db',
+                borderRadius: '8px', fontSize: '15px',
+                boxSizing: 'border-box', outline: 'none',
+                transition: 'border-color 0.2s'
               }}
-              placeholder="you@example.com"
+              placeholder="admin@example.com"
+              onFocus={e => e.target.style.borderColor = '#00897B'}
+              onBlur={e => e.target.style.borderColor = '#d1d5db'}
             />
           </div>
 
-          <div style={{ marginBottom: '30px' }}>
+          <div style={{ marginBottom: '28px' }}>
             <label style={{
-              display: 'block',
-              marginBottom: '8px',
-              color: '#333',
-              fontWeight: '500',
-              fontSize: '14px'
+              display: 'block', marginBottom: '6px',
+              color: '#374151', fontWeight: '600', fontSize: '14px'
             }}>
               Password
             </label>
@@ -136,14 +151,15 @@ export default function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
               style={{
-                width: '100%',
-                padding: '10px',
-                border: '1px solid #ddd',
-                borderRadius: '6px',
-                fontSize: '14px',
-                boxSizing: 'border-box'
+                width: '100%', padding: '11px 14px',
+                border: '1.5px solid #d1d5db',
+                borderRadius: '8px', fontSize: '15px',
+                boxSizing: 'border-box', outline: 'none',
+                transition: 'border-color 0.2s'
               }}
               placeholder="Enter your password"
+              onFocus={e => e.target.style.borderColor = '#00897B'}
+              onBlur={e => e.target.style.borderColor = '#d1d5db'}
             />
           </div>
 
@@ -151,50 +167,20 @@ export default function LoginPage() {
             type="submit"
             disabled={loading}
             style={{
-              width: '100%',
-              padding: '12px',
-              backgroundColor: '#00897B',
-              color: 'white',
-              border: 'none',
-              borderRadius: '6px',
-              fontSize: '16px',
-              fontWeight: '500',
-              cursor: loading ? 'not-allowed' : 'pointer',
-              opacity: loading ? 0.6 : 1
+              width: '100%', padding: '13px',
+              backgroundColor: loading ? '#9ca3af' : '#00897B',
+              color: 'white', border: 'none',
+              borderRadius: '8px', fontSize: '16px',
+              fontWeight: '600', cursor: loading ? 'not-allowed' : 'pointer',
+              transition: 'background-color 0.2s'
             }}
           >
-            {loading ? 'Logging in...' : 'Login'}
+            {loading ? '⏳ Signing in...' : '→ Login'}
           </button>
         </form>
 
-        <p style={{
-          textAlign: 'center',
-          marginTop: '20px',
-          color: '#666',
-          fontSize: '14px'
-        }}>
-          Don't have an account?{' '}
-          <Link href="/auth/signup" style={{
-            color: '#00897B',
-            textDecoration: 'none',
-            fontWeight: '500'
-          }}>
-            Sign up
-          </Link>
-        </p>
-
-        <p style={{
-          textAlign: 'center',
-          marginTop: '20px',
-          color: '#999',
-          fontSize: '12px'
-        }}>
-          <Link href="/" style={{
-            color: '#00897B',
-            textDecoration: 'none'
-          }}>
-            ← Back to home
-          </Link>
+        <p style={{ textAlign: 'center', marginTop: '24px', color: '#9ca3af', fontSize: '12px' }}>
+          <a href="/" style={{ color: '#00897B', textDecoration: 'none' }}>← Back to home</a>
         </p>
       </div>
     </div>
