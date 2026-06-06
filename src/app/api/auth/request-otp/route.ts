@@ -1,6 +1,113 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 
+async function sendOTPEmail(
+  email: string,
+  otp: string,
+  userRole: 'student' | 'admin'
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const apiKey = process.env.SENDGRID_API_KEY;
+    const fromEmail = process.env.SENDGRID_FROM_EMAIL || 'noreply@nursing-pwa.com';
+
+    if (!apiKey) {
+      throw new Error('SendGrid API key not configured');
+    }
+
+    const subject = userRole === 'admin'
+      ? 'Your Nursing PWA Admin Login Code'
+      : 'Your Nursing PWA Sign In Code';
+
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <style>
+            body { font-family: Arial, sans-serif; background-color: #f5f5f5; }
+            .container { max-width: 500px; margin: 20px auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+            .logo { color: #00897B; font-size: 24px; font-weight: bold; margin-bottom: 20px; }
+            .header { color: #333; font-size: 18px; margin-bottom: 10px; }
+            .otp-code { background: #f0f0f0; border: 2px solid #00897B; padding: 15px; text-align: center; font-size: 32px; font-weight: bold; letter-spacing: 4px; border-radius: 4px; margin: 20px 0; }
+            .footer { color: #999; font-size: 12px; margin-top: 20px; border-top: 1px solid #eee; padding-top: 10px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="logo">🎓 Nursing PWA</div>
+            <div class="header">Your One-Time Password (OTP)</div>
+            <p>Use this code to complete your ${userRole === 'admin' ? 'admin login' : 'sign up'}:</p>
+            <div class="otp-code">${otp}</div>
+            <p style="color: #666; font-size: 14px;">This code expires in 10 minutes.</p>
+            <p style="color: #666; font-size: 14px;">If you didn't request this code, please ignore this email.</p>
+            <div class="footer">
+              <p>Nursing PWA &copy; 2026. All rights reserved.</p>
+              <p>For support, contact: support@nursing-pwa.com</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+
+    const textContent = `
+Your One-Time Password (OTP)
+
+Use this code to complete your ${userRole === 'admin' ? 'admin login' : 'sign up'}:
+
+${otp}
+
+This code expires in 10 minutes.
+
+If you didn't request this code, please ignore this email.
+
+Nursing PWA Support
+support@nursing-pwa.com
+    `;
+
+    const mailData = {
+      personalizations: [
+        {
+          to: [{ email }],
+          subject,
+        },
+      ],
+      from: {
+        email: fromEmail,
+        name: 'Nursing PWA',
+      },
+      content: [
+        {
+          type: 'text/plain',
+          value: textContent,
+        },
+        {
+          type: 'text/html',
+          value: htmlContent,
+        },
+      ],
+    };
+
+    const response = await fetch('https://api.sendgrid.com/v3/mail/send', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(mailData),
+    });
+
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(`SendGrid API error: ${response.status} - ${error}`);
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error('Error sending OTP email:', error);
+    return { success: false, error: (error as Error).message };
+  }
+}
+
 interface RequestOTPBody {
   email?: string;
   phone?: string;
@@ -63,15 +170,8 @@ export async function POST(request: NextRequest) {
 
     // Send OTP email if email provided
     if (email) {
-      const emailResult = await supabase.functions.invoke('send-otp-email', {
-        body: {
-          email,
-          otp,
-          userRole,
-        },
-      });
-
-      if (emailResult.error) {
+      const emailResult = await sendOTPEmail(email, otp, userRole);
+      if (!emailResult.success) {
         console.error('Error sending OTP email:', emailResult.error);
         return NextResponse.json(
           { error: 'Failed to send OTP email. Please try again.' },

@@ -5,6 +5,8 @@ interface OTPEmailRequest {
   email: string
   otp: string
   userRole: "student" | "admin"
+  sendgridApiKey?: string
+  sendgridFromEmail?: string
 }
 
 serve(async (req) => {
@@ -13,11 +15,18 @@ serve(async (req) => {
       return new Response("Method not allowed", { status: 405 })
     }
 
-    const { email, otp, userRole }: OTPEmailRequest = await req.json()
+    const { email, otp, userRole, sendgridApiKey, sendgridFromEmail }: OTPEmailRequest = await req.json()
 
     if (!email || !otp || !userRole) {
       return new Response(
         JSON.stringify({ error: "Missing required fields" }),
+        { status: 400 }
+      )
+    }
+
+    if (!sendgridApiKey) {
+      return new Response(
+        JSON.stringify({ error: "SendGrid API key not provided" }),
         { status: 400 }
       )
     }
@@ -79,6 +88,8 @@ support@nursing-pwa.com
       subject,
       htmlContent,
       textContent,
+      fromEmail: sendgridFromEmail,
+      apiKey: sendgridApiKey,
     })
 
     return new Response(

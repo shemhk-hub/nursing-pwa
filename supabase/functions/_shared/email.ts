@@ -10,15 +10,16 @@ interface EmailPayload {
   textContent: string
   fromEmail?: string
   fromName?: string
+  apiKey?: string
 }
 
 export async function sendEmail(payload: EmailPayload): Promise<any> {
-  const sendgridApiKey = Deno.env.get("SENDGRID_API_KEY")
+  const sendgridApiKey = payload.apiKey || Deno.env.get("SENDGRID_API_KEY")
   const fromEmail = payload.fromEmail || Deno.env.get("SENDGRID_FROM_EMAIL") || "noreply@nursing-pwa.com"
   const fromName = payload.fromName || Deno.env.get("SENDGRID_FROM_NAME") || "Nursing PWA"
 
   if (!sendgridApiKey) {
-    throw new Error("SENDGRID_API_KEY not configured")
+    throw new Error("SENDGRID_API_KEY not configured and no API key provided in request")
   }
 
   const mailData = {
