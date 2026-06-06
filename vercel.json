@@ -1,0 +1,127 @@
+// vercel.json
+// Nursing PWA - Vercel Deployment Configuration
+// Auto-generated for production deployment
+
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
+  "devCommand": "npm run dev",
+  "installCommand": "npm install",
+  "framework": "nextjs",
+  "nodeVersion": "18.x",
+  
+  // Environment variables (set in Vercel dashboard)
+  "env": {
+    "NEXT_PUBLIC_SUPABASE_URL": "@supabase_url",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "@supabase_anon_key",
+    "SUPABASE_SERVICE_KEY": "@supabase_service_key",
+    "SENDGRID_API_KEY": "@sendgrid_api_key",
+    "SENDGRID_FROM_EMAIL": "noreply@nursing-pwa.com",
+    "NEXT_PUBLIC_APP_URL": "@app_url"
+  },
+
+  // Build configuration
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/next"
+    }
+  ],
+
+  // Routes configuration
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html",
+      "status": 200
+    }
+  ],
+
+  // Performance optimization
+  "github": {
+    "enabled": true,
+    "autoAlias": true,
+    "autoJobCancelPreviousOnPush": true
+  },
+
+  // Functions
+  "functions": {
+    "api/**/*.ts": {
+      "memory": 1024,
+      "maxDuration": 60
+    }
+  },
+
+  // Redirects
+  "redirects": [
+    {
+      "source": "/admin",
+      "destination": "/admin/dashboard",
+      "permanent": false
+    },
+    {
+      "source": "/app",
+      "destination": "/app/home",
+      "permanent": false
+    }
+  ],
+
+  // Headers
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        }
+      ]
+    },
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=31536000; includeSubDomains"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        }
+      ]
+    }
+  ],
+
+  // Regions (optional - set to your region)
+  "regions": ["iad1"],
+
+  // Serverless function configuration
+  "serverlessFunctionRegion": "iad1",
+
+  // Logging
+  "logs": {
+    "enabled": true
+  },
+
+  // Analytics
+  "analytics": {
+    "enabled": true
+  },
+
+  // Web Vitals
+  "webAnalytics": {
+    "enabled": true
+  }
+}
